@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes id="DBClient" xmlns="http://camel.apache.org/schema/spring">
+    <route id="Insert customer">
+        <from uri="direct:insertCustomer"/>
+        <log loggingLevel="INFO" message="Creating new customer..."/>
+        <convertBodyTo type="java.lang.String"/>
+        <process ref="JSonProcessor"/>
+        <to uri="direct:insertRecord"/>
+        <log loggingLevel="INFO" message="Done"/>
+        <setBody>
+            <simple>{"count": 1}</simple>
+        </setBody>
+        <removeHeaders pattern="*"/>
+    </route>
+    <route id="Insert record to database">
+        <from uri="direct:insertRecord"/>
+        <to uri="sql:insert into customers values(:#cid,:#name,:#city)"/> 
+        <log loggingLevel="INFO" message="Inserted new customer."/>
+    </route>
+    <route id="Get all customers from city">
+        <from uri="direct:getCustomers"/>
+        <validate>
+            <simple>${header.limit} range '1..{{batchLimit}}'</simple>
+        </validate>
+        <log loggingLevel="INFO" message="Get all customers from ${header.city} with limit ${header.limit}"/>
+        <to uri="sql-stored:get_customers_json('p_city' VARCHAR ${header.city},'p_limit' INTEGER ${header.limit}, OUT CLOB result_clob)"/>
+        <process ref="ClobProcessor"/>
+        <removeHeaders pattern="*"/>
+    </route>
+    <route id="Get all customers">
+        <from uri="direct:getAllCustomers"/>
+        <validate>
+            <simple>${header.limit} range '1..{{batchLimit}}'</simple>
+        </validate>
+        <log loggingLevel="INFO" message="Get all customers with limit ${header.limit}"/>
+        <to uri="sql:select * from customers fetch first :#limit rows only"/>
+        <to uri="direct:processOutput"/>
+    </route>
+    <route id="Delete customer">
+        <from uri="direct:deleteCustomer"/>
+        <log loggingLevel="INFO" message="Delete customer ${header.cid}"/>
+        <to uri="sql:delete from customers where customer_id = :#cid"/>
+        <setBody>
+            <simple>{"status" : "ok"}</simple>
+        </setBody>
+        <removeHeaders pattern="*"/>   
+    </route>
+    <route id="Process output">
+        <from uri="direct:processOutput"/>
+        <marshal>
+            <json id="json" library="Jackson"/>
+        </marshal>
+        <removeHeaders pattern="*"/>
+    </route>
+    <route id="Log error">
+        <from uri="direct:logError"/>
+        <log logName="net.gmsworld.server.camel" loggingLevel="ERROR" message="Operation failed with exception: ${exception.stacktrace}"/>
+        <setBody>
+            <simple>{"error" : "Operation failed"}</simple>
+        </setBody>
+        <removeHeaders pattern="*"/>
+        <setHeader name="CamelHttpResponseCode">
+            <constant>500</constant>
+        </setHeader>
+    </route>
+</routes>

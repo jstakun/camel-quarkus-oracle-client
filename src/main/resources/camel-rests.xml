@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rests xmlns="http://camel.apache.org/schema/spring">
+    <rest id="db-client" path="/camel">
+        <post consumes="application/json" id="insertCustomer" uri="/v1/customers">
+            <route>
+                <doTry>
+                    <to uri="direct:insertCustomer"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </post>
+        <get id="getCustomersByCity" produces="application/json" uri="/v1/customers/{city}/{limit}">
+            <route>
+                <doTry>
+                    <to uri="direct:getCustomers"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </get>
+        <get id="getCustomers" produces="application/json" uri="/v1/customers/{limit}">
+            <route>
+                <doTry>
+                    <to uri="direct:getAllCustomers"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </get>
+        <delete id="deleteCustomer" uri="/v1/customers/{cid}">
+            <route>
+                <doTry>
+                    <to uri="direct:deleteCustomer"/>
+                    <doCatch>
+                        <exception>java.lang.Exception</exception>
+                        <to uri="direct:logError"/>
+                    </doCatch>
+                </doTry>
+            </route>
+        </delete>
+    </rest>
+</rests>
