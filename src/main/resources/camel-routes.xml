@@ -14,7 +14,7 @@
     </route>
     <route id="Insert record to database">
         <from uri="direct:insertRecord"/>
-        <to uri="sql:insert into customers values(:#cid,:#name,:#city)"/> 
+        <to uri="sql:insert into customers values(:#cid,:#name,:#city)"/>
         <log loggingLevel="INFO" message="Inserted new customer."/>
     </route>
     <route id="Get all customers from city">
@@ -43,7 +43,7 @@
         <setBody>
             <simple>{"status" : "ok"}</simple>
         </setBody>
-        <removeHeaders pattern="*"/>   
+        <removeHeaders pattern="*"/>
     </route>
     <route id="Process output">
         <from uri="direct:processOutput"/>
