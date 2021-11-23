@@ -2,7 +2,6 @@ package org.redhat;
 
 import java.io.Reader;
 import java.util.LinkedHashMap;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -25,16 +24,22 @@ public class ClobProcessor implements Processor {
 	public void process(Exchange exchange) throws Exception {
 		Object body = exchange.getIn().getBody();
 		if (body instanceof LinkedHashMap) {
-			LinkedHashMap map = (LinkedHashMap) body;
+			LinkedHashMap<String, Object> map = (LinkedHashMap<String, Object>) body;
 			if (map.containsKey("result_clob")) {
 				LOG.info("Processing clob...");
-				Reader r = ((CLOB)map.get("result_clob")).getCharacterStream();
-				StringBuffer buffer = new StringBuffer();
-				int ch;
-				while ((ch = r.read())!=-1) {
-					buffer.append(""+(char)ch);
+				Object clob = map.get("result_clob");
+				if (clob != null) {
+					Reader r = ((CLOB)clob).getCharacterStream();
+					StringBuffer buffer = new StringBuffer();
+					int ch;
+					while ((ch = r.read())!=-1) {
+						buffer.append(""+(char)ch);
+					}
+					exchange.getIn().setBody(buffer.toString());
+				} else {
+					LOG.info("Emply clob.");
+					exchange.getIn().setBody("[]");
 				}
-				exchange.getIn().setBody(buffer.toString());
 			} else {
 				LOG.info("Result clob missing in " + map.keySet());
 			}

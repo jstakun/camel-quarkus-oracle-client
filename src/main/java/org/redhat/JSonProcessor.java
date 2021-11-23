@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.apache.camel.Exchange;
@@ -19,12 +20,14 @@ import io.quarkus.runtime.annotations.RegisterForReflection;
 @RegisterForReflection
 public class JSonProcessor implements Processor {
 
+	@Inject
+	ObjectMapper mapper;
+	
 	@Override
 	public void process(Exchange exchange) throws Exception {
 		Object body = exchange.getIn().getBody();
 		try {
-			ObjectMapper mapper = new ObjectMapper();
-		    JsonNode json = mapper.readTree((String)body);
+			JsonNode json = mapper.readTree((String)body);
 		    Map<String, Object> customer = new HashMap<String, Object>();
 		    customer.put("cid", json.get("cid").asInt());
 		    customer.put("name", json.get("name").asText());
