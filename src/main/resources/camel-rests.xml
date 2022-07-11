@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rests xmlns="http://camel.apache.org/schema/spring">
+<rests xmlns="https://camel.apache.org/schema/spring/camel-spring-3.0.0.xsd">
     <rest id="db-client" path="/camel">
         <post consumes="application/json" id="insertCustomer" uri="/v1/customers">
             <route>
